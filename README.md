@@ -1,2 +1,0 @@
-# SSU
-University
