@@ -223,4 +223,52 @@ demand. This system can respond to arbitrarily small changes in inputs,
 and the processing burden is minimal.
 
 """
+import skfuzzy.control as ctrl
+
+food = ctrl.Antecedent(x_qual, 'food')
+service = ctrl.Antecedent(x_serv, 'service')
+tip = ctrl.Consequent(x_tip, 'tip')
+
+food['L'] = qual_lo
+food['M'] = qual_md
+food['H'] = qual_hi
+service['L'] = serv_lo
+service['M'] = serv_md
+service['H'] = serv_hi
+tip['L'] = tip_lo
+tip['M'] = tip_md
+tip['H'] = tip_hi
+
+rule1 = ctrl.Rule(antecedent=(food['L'] | service['L']), consequent=(tip['L']), label="low")
+rule2 = ctrl.Rule(antecedent=(service['M']), consequent=(tip['M']), label="medium")
+rule3 = ctrl.Rule(antecedent=(food['H'] | service['H']), consequent=(tip['H']), label="high")
+
+tipping_ctrl = ctrl.ControlSystem(rules=[rule1, rule2, rule3])
+
+tipping = ctrl.ControlSystemSimulation(tipping_ctrl)
+
+upsampled = np.linspace(0, 10, 10)
+x, y = np.meshgrid(upsampled, upsampled)
+z = np.zeros_like(x)
+
+for i in range(10):
+    for j in range(10):
+        tipping.input['food'] = x[i, j]
+        tipping.input['service'] = y[i, j]
+        tipping.compute()
+        z[i, j] = tipping.output['tip']
+
+from mpl_toolkits.mplot3d import Axes3D 
+
+fig = plt.figure(figsize=(8, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+surf = ax.plot_surface(x, y, z, rstride=1, cstride=1, cmap='viridis',
+                       linewidth=0.4, antialiased=True)
+
+cset = ax.contourf(x, y, z, zdir='z', offset=-2.5, cmap='viridis', alpha=0.5)
+cset = ax.contourf(x, y, z, zdir='x', offset=13, cmap='viridis', alpha=0.5)
+cset = ax.contourf(x, y, z, zdir='y', offset=13, cmap='viridis', alpha=0.5)
+
+ax.view_init(30,240)
  # %%
