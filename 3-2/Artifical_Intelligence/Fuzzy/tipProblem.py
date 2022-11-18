@@ -46,15 +46,6 @@ x_serv = np.arange(0, 11, 1)
 x_tip  = np.arange(0, 26, 1)
 
 # Generate fuzzy membership functions
-# qual_lo = fuzz.trimf(x_qual, [0, 0, 5])
-# qual_md = fuzz.trimf(x_qual, [0, 5, 10])
-# qual_hi = fuzz.trimf(x_qual, [5, 10, 10])
-# serv_lo = fuzz.trimf(x_serv, [0, 0, 5])
-# serv_md = fuzz.trimf(x_serv, [0, 5, 10])
-# serv_hi = fuzz.trimf(x_serv, [5, 10, 10])
-# tip_lo = fuzz.trimf(x_tip, [0, 0, 13])
-# tip_md = fuzz.trimf(x_tip, [0, 13, 25])
-# tip_hi = fuzz.trimf(x_tip, [13, 25, 25])
 qual_lo = fuzz.gaussmf(x_qual, 0.0, 2.0)
 qual_md = fuzz.gaussmf(x_qual, 5.0, 2.0)
 qual_hi = fuzz.gaussmf(x_qual, 10.0, 2.0)
@@ -225,35 +216,37 @@ and the processing burden is minimal.
 """
 import skfuzzy.control as ctrl
 
-food = ctrl.Antecedent(x_qual, 'food')
-service = ctrl.Antecedent(x_serv, 'service')
-tip = ctrl.Consequent(x_tip, 'tip')
+universe1 = np.linspace(0, 10, 11)
+universe2 = np.linspace(0, 25, 26)
+quality = ctrl.Antecedent(universe1, 'quality')
+service = ctrl.Antecedent(universe1, 'service')
+tip = ctrl.Consequent(universe2, 'tip')
 
-food['L'] = qual_lo
-food['M'] = qual_md
-food['H'] = qual_hi
-service['L'] = serv_lo
-service['M'] = serv_md
-service['H'] = serv_hi
-tip['L'] = tip_lo
-tip['M'] = tip_md
-tip['H'] = tip_hi
+quality['bad'] = qual_lo
+quality['descent'] = qual_md
+quality['great'] = qual_hi
+service['poor'] = serv_lo
+service['acceptable'] = serv_md
+service['amazing'] = serv_hi
+tip['low'] = tip_lo
+tip['medium'] = tip_md
+tip['high'] = tip_hi
 
-rule1 = ctrl.Rule(antecedent=(food['L'] | service['L']), consequent=(tip['L']), label="low")
-rule2 = ctrl.Rule(antecedent=(service['M']), consequent=(tip['M']), label="medium")
-rule3 = ctrl.Rule(antecedent=(food['H'] | service['H']), consequent=(tip['H']), label="high")
-
+rule1 = ctrl.Rule(antecedent=(quality['bad'] | service['poor']), consequent=(tip['low']), label="low")
+rule2 = ctrl.Rule(antecedent=(service['acceptable']), consequent=(tip['medium']), label="medium")
+rule3 = ctrl.Rule(antecedent=(quality['great'] | service['amazing']), consequent=(tip['high']), label="high")
+x
 tipping_ctrl = ctrl.ControlSystem(rules=[rule1, rule2, rule3])
 
 tipping = ctrl.ControlSystemSimulation(tipping_ctrl)
 
-upsampled = np.linspace(0, 10, 10)
+upsampled = np.linspace(0, 10, 21)
 x, y = np.meshgrid(upsampled, upsampled)
 z = np.zeros_like(x)
 
-for i in range(10):
-    for j in range(10):
-        tipping.input['food'] = x[i, j]
+for i in range(21):
+    for j in range(21):
+        tipping.input['quality'] = x[i, j]
         tipping.input['service'] = y[i, j]
         tipping.compute()
         z[i, j] = tipping.output['tip']
@@ -266,9 +259,10 @@ ax = fig.add_subplot(111, projection='3d')
 surf = ax.plot_surface(x, y, z, rstride=1, cstride=1, cmap='viridis',
                        linewidth=0.4, antialiased=True)
 
-cset = ax.contourf(x, y, z, zdir='z', offset=-2.5, cmap='viridis', alpha=0.5)
-cset = ax.contourf(x, y, z, zdir='x', offset=13, cmap='viridis', alpha=0.5)
-cset = ax.contourf(x, y, z, zdir='y', offset=13, cmap='viridis', alpha=0.5)
-
+ax.set_xlabel('Quality')
+ax.set_ylabel('Service')
+ax.set_zlabel('Tip')
 ax.view_init(30,240)
+ # %%
+
  # %%
