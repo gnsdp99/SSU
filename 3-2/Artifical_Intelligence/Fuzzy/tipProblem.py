@@ -1,39 +1,3 @@
-"""
-==================================
-The Tipping Problem - The Hard Way
-==================================
-
- Note: This method computes everything by hand, step by step. For most people,
- the new API for fuzzy systems will be preferable. The same problem is solved
- with the new API `in this example <./plot_tipping_problem_newapi.html>`_.
-
-The 'tipping problem' is commonly used to illustrate the power of fuzzy logic
-principles to generate complex behavior from a compact, intuitive set of
-expert rules.
-
-Input variables
----------------
-
-A number of variables play into the decision about how much to tip while
-dining. Consider two of them:
-
-* ``quality`` : Quality of the food
-* ``service`` : Quality of the service
-
-Output variable
----------------
-
-The output variable is simply the tip amount, in percentage points:
-
-* ``tip`` : Percent of bill to add as tip
-
-
-For the purposes of discussion, let's say we need 'high', 'medium', and 'low'
-membership functions for both input variables and our output variable. These
-are defined in scikit-fuzzy as follows
-
-"""
-#%%
 import numpy as np
 import skfuzzy as fuzz
 import matplotlib.pyplot as plt
@@ -85,33 +49,6 @@ for ax in (ax0, ax1, ax2):
     ax.get_yaxis().tick_left()
 plt.tight_layout()
 
-"""
-.. image:: PLOT2RST.current_figure
-
-Fuzzy rules
------------
-
-Now, to make these triangles useful, we define the *fuzzy relationship*
-between input and output variables. For the purposes of our example, consider
-three simple rules:
-
-1. If the food is bad OR the service is poor, then the tip will be low
-2. If the service is acceptable, then the tip will be medium
-3. If the food is great OR the service is amazing, then the tip will be high.
-
-Most people would agree on these rules, but the rules are fuzzy. Mapping the
-imprecise rules into a defined, actionable tip is a challenge. This is the
-kind of task at which fuzzy logic excels.
-
-Rule application
-----------------
-
-What would the tip be in the following circumstance:
-
-* Food *quality* was **6.5**
-* *Service* was **9.8**
-
-"""
 # We need the activation of our fuzzy membership functions at these values.
 # The exact values 6.5 and 9.8 do not exist on our universes...
 # This is what fuzz.interp_membership exists for!
@@ -157,25 +94,6 @@ for ax in (ax0,):
     ax.get_yaxis().tick_left()
 plt.tight_layout()
 
-"""
-.. image:: PLOT2RST.current_figure
-
-Rule aggregation
-----------------
-
-With the *activity* of each output membership function known, all output
-membership functions must be combined. This is typically done using a
-maximum operator. This step is also known as *aggregation*.
-
-Defuzzification
----------------
-Finally, to get a real world answer, we return to *crisp* logic from the
-world of fuzzy membership functions. For the purposes of this example
-the centroid method will be used.
-
-The result is a tip of **20.2%**.
----------------------------------
-"""
 # Aggregate all three output membership functions together
 aggregated = np.fmax(tip_activation_lo,
                      np.fmax(tip_activation_md, tip_activation_hi))
@@ -200,20 +118,6 @@ for ax in (ax0,):
     ax.get_yaxis().tick_left()
 plt.tight_layout()
 
-"""
-.. image:: PLOT2RST.current_figure
-
-Final thoughts
---------------
-
-The power of fuzzy systems is allowing complicated, intuitive behavior based
-on a sparse system of rules with minimal overhead. Note our membership
-function universes were coarse, only defined at the integers, but
-``fuzz.interp_membership`` allowed the effective resolution to increase on
-demand. This system can respond to arbitrarily small changes in inputs,
-and the processing burden is minimal.
-
-"""
 import skfuzzy.control as ctrl
 
 universe1 = np.linspace(0, 10, 11)
@@ -263,6 +167,3 @@ ax.set_xlabel('Quality')
 ax.set_ylabel('Service')
 ax.set_zlabel('Tip')
 ax.view_init(30,240)
- # %%
-
- # %%
